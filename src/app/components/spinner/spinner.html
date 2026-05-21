@@ -1,0 +1,25 @@
+@if (loading.isLoading()) {
+  <!-- Full-screen loading overlay -->
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+    <!-- Top progress bar -->
+    <div class="absolute top-0 left-0 right-0 h-0.5 bg-indigo-100 overflow-hidden">
+      <div class="h-full bg-indigo-500 animate-[progress_1.2s_ease-in-out_infinite]"
+           style="width:40%;animation:progress 1.2s ease-in-out infinite;"></div>
+    </div>
+
+    <!-- Centered spinner card -->
+    <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-6 flex items-center gap-4 pointer-events-auto border border-gray-100 dark:border-slate-700">
+      <div class="relative w-10 h-10">
+        <svg class="animate-spin w-10 h-10 text-indigo-500" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+          <path class="opacity-90" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">Loading</p>
+        <p class="text-xs text-gray-400 dark:text-gray-400">Please wait…</p>
+      </div>
+    </div>
+  </div>
+}

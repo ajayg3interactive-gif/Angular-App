@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { UserService } from '../services/user.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,12 +12,14 @@ import { UserService } from '../services/user.service';
   styleUrl: './login.css',
 })
 export class Login {
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
+  private fb          = inject(FormBuilder);
+  private router      = inject(Router);
+  private route       = inject(ActivatedRoute);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -24,7 +27,7 @@ export class Login {
   showPassword = false;
   isSubmitting = false;
 
-  get email() { return this.loginForm.get('email')!; }
+  get email()    { return this.loginForm.get('email')!; }
   get password() { return this.loginForm.get('password')!; }
 
   emailInputClass(): string {
@@ -55,8 +58,13 @@ export class Login {
     this.userService.authenticate(email, password).subscribe({
       next: (users) => {
         if (users.length > 0) {
+          // Persist session via AuthService
+          this.authService.login(users[0]);
           this.loginMessage = { type: 'success', text: 'Login successful! Redirecting…' };
-          setTimeout(() => this.router.navigate(['/dashboard']), 800);
+
+          // Redirect to originally requested URL or dashboard
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+          setTimeout(() => this.router.navigateByUrl(returnUrl), 800);
         } else {
           this.loginMessage = { type: 'error', text: 'Invalid email or password. Please try again.' };
           this.isSubmitting = false;

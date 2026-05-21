@@ -1,3 +1,158 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/* ── Enable class-based dark mode (Tailwind v4) ── */
+@variant dark (&:where(.dark, .dark *));
+
+/* ══════════════════════════════════════════
+   THEME CSS CUSTOM PROPERTIES
+   data-theme attribute is set by ThemeService
+   ══════════════════════════════════════════ */
+
+:root,
+[data-theme='light'] {
+  --accent:          #6366f1;
+  --accent-hover:    #4f46e5;
+  --sidebar-bg:      #0f172a;
+  --sidebar-hover:   #1e293b;
+  --sidebar-active:  #4f46e5;
+  --sidebar-text:    #ffffff;
+  --header-bg:       #ffffff;
+  --page-bg:         #f9fafb;
+  --card-bg:         #ffffff;
+  --text-primary:    #111827;
+  --text-secondary:  #6b7280;
+  --border-color:    #e5e7eb;
+}
+
+[data-theme='dark'] {
+  --accent:          #818cf8;
+  --accent-hover:    #6366f1;
+  --sidebar-bg:      #020617;
+  --sidebar-hover:   #0f172a;
+  --sidebar-active:  #6366f1;
+  --sidebar-text:    #e2e8f0;
+  --header-bg:       #1e293b;
+  --page-bg:         #0f172a;
+  --card-bg:         #1e293b;
+  --text-primary:    #f1f5f9;
+  --text-secondary:  #94a3b8;
+  --border-color:    #334155;
+}
+
+[data-theme='blue'] {
+  --accent:          #2563eb;
+  --accent-hover:    #1d4ed8;
+  --sidebar-bg:      #1e3a5f;
+  --sidebar-hover:   #1e4576;
+  --sidebar-active:  #2563eb;
+  --sidebar-text:    #ffffff;
+  --header-bg:       #eff6ff;
+  --page-bg:         #eff6ff;
+  --card-bg:         #ffffff;
+  --text-primary:    #1e3a5f;
+  --text-secondary:  #6b7280;
+  --border-color:    #bfdbfe;
+}
+
+[data-theme='purple'] {
+  --accent:          #7c3aed;
+  --accent-hover:    #6d28d9;
+  --sidebar-bg:      #3b0764;
+  --sidebar-hover:   #4c1d95;
+  --sidebar-active:  #7c3aed;
+  --sidebar-text:    #ffffff;
+  --header-bg:       #faf5ff;
+  --page-bg:         #faf5ff;
+  --card-bg:         #ffffff;
+  --text-primary:    #3b0764;
+  --text-secondary:  #6b7280;
+  --border-color:    #e9d5ff;
+}
+
+[data-theme='modern'] {
+  --accent:          #06b6d4;
+  --accent-hover:    #0891b2;
+  --sidebar-bg:      #020617;
+  --sidebar-hover:   #0f172a;
+  --sidebar-active:  #0891b2;
+  --sidebar-text:    #e2e8f0;
+  --header-bg:       #0f172a;
+  --page-bg:         #0f172a;
+  --card-bg:         #1e293b;
+  --text-primary:    #e2e8f0;
+  --text-secondary:  #94a3b8;
+  --border-color:    #334155;
+}
+
+/* ══════════════════════════════════════════
+   GLOBAL DARK/MODERN OVERRIDES
+   Applies CSS vars to existing Tailwind utility
+   classes so existing pages theme automatically
+   ══════════════════════════════════════════ */
+
+:is([data-theme='dark'], [data-theme='modern']) .bg-gray-50 {
+  background-color: var(--page-bg) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .border-gray-200,
+:is([data-theme='dark'], [data-theme='modern']) .border-gray-100 {
+  border-color: var(--border-color) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .text-gray-800,
+:is([data-theme='dark'], [data-theme='modern']) .text-gray-700 {
+  color: var(--text-primary) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .text-gray-600,
+:is([data-theme='dark'], [data-theme='modern']) .text-gray-500,
+:is([data-theme='dark'], [data-theme='modern']) .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .bg-gray-100 {
+  background-color: var(--sidebar-hover) !important;
+}
+
+:is([data-theme='dark'], [data-theme='modern']) .bg-gray-50\/80 {
+  background-color: color-mix(in srgb, var(--card-bg) 80%, transparent) !important;
+}
+
+/* Table row hover in dark themes */
+:is([data-theme='dark'], [data-theme='modern']) .hover\:bg-indigo-50\/30:hover {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Input fields in dark themes */
+:is([data-theme='dark'], [data-theme='modern']) input,
+:is([data-theme='dark'], [data-theme='modern']) select {
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:is([data-theme='dark'], [data-theme='modern']) input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Blue/Purple/Modern - update stat card backgrounds */
+:is([data-theme='blue'], [data-theme='purple']) .bg-blue-100   { background-color: #dbeafe; }
+:is([data-theme='blue'], [data-theme='purple']) .bg-green-100  { background-color: #dcfce7; }
+:is([data-theme='blue'], [data-theme='purple']) .bg-red-100    { background-color: #fee2e2; }
+
+/* ── Spinner progress bar animation ── */
+@keyframes progress {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(0%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ── Toast slide-up animation ── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}

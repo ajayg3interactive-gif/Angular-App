@@ -1,0 +1,274 @@
+<div class="flex min-h-screen" style="background-color:var(--page-bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 min-w-0 transition-all duration-300">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-20 px-6 py-4 flex items-center justify-between shadow-sm"
+            style="background-color:var(--header-bg);border-bottom:1px solid var(--border-color)">
+      <div class="w-10 lg:hidden"></div>
+      <h1 class="text-xl lg:text-2xl font-bold flex-1 text-center lg:text-left"
+          style="color:var(--text-primary)">My Profile</h1>
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
+           style="background-color:var(--accent)">
+        {{ userInitial }}
+      </div>
+    </header>
+
+    <div class="p-6 lg:p-8 max-w-4xl mx-auto">
+
+      <!-- Profile hero card -->
+      <div class="rounded-2xl shadow-sm border mb-6 overflow-hidden"
+           style="background-color:var(--card-bg);border-color:var(--border-color)">
+        <!-- Banner -->
+        <div class="h-28 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500"></div>
+        <!-- Avatar + name -->
+        <div class="px-6 pb-6 -mt-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div class="flex items-end gap-4">
+            <div class="w-20 h-20 rounded-2xl border-4 border-white dark:border-slate-700 flex items-center justify-center text-2xl font-bold text-white shadow-lg"
+                 style="background-color:var(--accent)">
+              {{ userInitial }}
+            </div>
+            <div class="pb-1">
+              <h2 class="text-xl font-bold" style="color:var(--text-primary)">
+                {{ auth.currentUser()?.name ?? '—' }}
+              </h2>
+              <p class="text-sm" style="color:var(--text-secondary)">
+                {{ auth.currentUser()?.email ?? '—' }}
+              </p>
+              <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                {{ auth.currentUser()?.role ?? 'user' | titlecase }}
+              </span>
+            </div>
+          </div>
+          <div class="flex gap-2 text-xs" style="color:var(--text-secondary)">
+            <span>Last login:</span>
+            <span class="font-medium" style="color:var(--text-primary)">
+              {{ (auth.currentUser()?.loginAt ?? '') | date:'medium' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-1 mb-6 p-1 rounded-xl w-fit"
+           style="background-color:var(--border-color)">
+        <button
+          (click)="activeTab.set('profile')"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+          [style.background-color]="activeTab() === 'profile' ? 'var(--card-bg)' : 'transparent'"
+          [style.color]="activeTab() === 'profile' ? 'var(--accent)' : 'var(--text-secondary)'"
+          [style.box-shadow]="activeTab() === 'profile' ? '0 1px 3px rgba(0,0,0,.1)' : 'none'"
+        >
+          Profile
+        </button>
+        <button
+          (click)="activeTab.set('settings')"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+          [style.background-color]="activeTab() === 'settings' ? 'var(--card-bg)' : 'transparent'"
+          [style.color]="activeTab() === 'settings' ? 'var(--accent)' : 'var(--text-secondary)'"
+          [style.box-shadow]="activeTab() === 'settings' ? '0 1px 3px rgba(0,0,0,.1)' : 'none'"
+        >
+          Settings
+        </button>
+      </div>
+
+      <!-- ── PROFILE TAB ── -->
+      @if (activeTab() === 'profile') {
+        <div class="rounded-2xl shadow-sm border p-6"
+             style="background-color:var(--card-bg);border-color:var(--border-color)">
+          <h3 class="text-base font-semibold mb-5" style="color:var(--text-primary)">
+            Edit Profile
+          </h3>
+          <div class="space-y-5">
+            <!-- Name -->
+            <div>
+              <label class="block text-sm font-medium mb-1.5" style="color:var(--text-secondary)">
+                Full Name
+              </label>
+              <input
+                type="text"
+                [ngModel]="editName()"
+                (ngModelChange)="editName.set($event)"
+                class="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+                style="background-color:var(--page-bg);border:1px solid var(--border-color);color:var(--text-primary)"
+                placeholder="Your full name"
+              />
+            </div>
+            <!-- Email -->
+            <div>
+              <label class="block text-sm font-medium mb-1.5" style="color:var(--text-secondary)">
+                Email Address
+              </label>
+              <input
+                type="email"
+                [ngModel]="editEmail()"
+                (ngModelChange)="editEmail.set($event)"
+                class="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+                style="background-color:var(--page-bg);border:1px solid var(--border-color);color:var(--text-primary)"
+                placeholder="Your email"
+              />
+            </div>
+            <!-- Role (read-only) -->
+            <div>
+              <label class="block text-sm font-medium mb-1.5" style="color:var(--text-secondary)">
+                Role
+              </label>
+              <input
+                type="text"
+                [value]="auth.currentUser()?.role ?? ''"
+                disabled
+                class="w-full px-4 py-2.5 rounded-xl text-sm opacity-60 cursor-not-allowed"
+                style="background-color:var(--page-bg);border:1px solid var(--border-color);color:var(--text-secondary)"
+              />
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end">
+            <button
+              (click)="saveProfile()"
+              [disabled]="isSaving()"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white
+                     disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              style="background-color:var(--accent)"
+            >
+              @if (isSaving()) {
+                <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Saving…
+              } @else {
+                Save Changes
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ── SETTINGS TAB ── -->
+      @if (activeTab() === 'settings') {
+        <div class="space-y-6">
+
+          <!-- Dark Mode -->
+          <div class="rounded-2xl shadow-sm border p-6"
+               style="background-color:var(--card-bg);border-color:var(--border-color)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-base font-semibold" style="color:var(--text-primary)">Dark Mode</h4>
+                <p class="text-sm mt-0.5" style="color:var(--text-secondary)">
+                  Toggle dark appearance globally
+                </p>
+              </div>
+              <!-- Toggle switch -->
+              <button
+                role="switch"
+                [attr.aria-checked]="themeService.isDark()"
+                (click)="toggleDarkMode()"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                       transition-colors duration-200 focus:outline-none"
+                [style.background-color]="themeService.isDark() ? 'var(--accent)' : '#d1d5db'"
+              >
+                <span
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"
+                  [class.translate-x-5]="themeService.isDark()"
+                  [class.translate-x-0]="!themeService.isDark()"
+                ></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Theme Selector -->
+          <div class="rounded-2xl shadow-sm border p-6"
+               style="background-color:var(--card-bg);border-color:var(--border-color)">
+            <h4 class="text-base font-semibold mb-1" style="color:var(--text-primary)">Theme</h4>
+            <p class="text-sm mb-5" style="color:var(--text-secondary)">
+              Pick an accent colour scheme
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              @for (t of themes; track t.name) {
+                <button
+                  (click)="setTheme(t.name)"
+                  class="relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200
+                         hover:-translate-y-0.5 hover:shadow-md"
+                  [style.border-color]="isActiveTheme(t.name) ? t.accent : 'var(--border-color)'"
+                  [style.background-color]="isActiveTheme(t.name) ? t.accent + '15' : 'var(--page-bg)'"
+                >
+                  <!-- Swatch -->
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl shadow-sm"
+                       [style.background-color]="t.bg">
+                    {{ t.icon }}
+                  </div>
+                  <span class="text-xs font-semibold" style="color:var(--text-primary)">{{ t.label }}</span>
+                  @if (isActiveTheme(t.name)) {
+                    <div class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                         [style.background-color]="t.accent">
+                      <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="rounded-2xl shadow-sm border p-6"
+               style="background-color:var(--card-bg);border-color:var(--border-color)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-base font-semibold" style="color:var(--text-primary)">Notifications</h4>
+                <p class="text-sm mt-0.5" style="color:var(--text-secondary)">
+                  Receive in-app alerts and updates
+                </p>
+              </div>
+              <button
+                role="switch"
+                [attr.aria-checked]="themeService.notifications()"
+                (click)="toggleNotifications()"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                       transition-colors duration-200 focus:outline-none"
+                [style.background-color]="themeService.notifications() ? 'var(--accent)' : '#d1d5db'"
+              >
+                <span
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"
+                  [class.translate-x-5]="themeService.notifications()"
+                  [class.translate-x-0]="!themeService.notifications()"
+                ></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Language -->
+          <div class="rounded-2xl shadow-sm border p-6"
+               style="background-color:var(--card-bg);border-color:var(--border-color)">
+            <h4 class="text-base font-semibold mb-1" style="color:var(--text-primary)">Language</h4>
+            <p class="text-sm mb-4" style="color:var(--text-secondary)">
+              Select your preferred language
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @for (lang of languages; track lang.code) {
+                <button
+                  (click)="setLanguage(lang.code)"
+                  class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-left"
+                  [style.border-color]="themeService.language() === lang.code ? 'var(--accent)' : 'var(--border-color)'"
+                  [style.background-color]="themeService.language() === lang.code ? 'var(--accent)' + '15' : 'var(--page-bg)'"
+                >
+                  <span class="text-xl">{{ lang.flag }}</span>
+                  <span class="text-sm font-medium" style="color:var(--text-primary)">{{ lang.label }}</span>
+                  @if (themeService.language() === lang.code) {
+                    <svg class="ml-auto w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         [style.color]="'var(--accent)'">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  </main>
+</div>

@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { User } from '../../interfaces/user';
 import { Sidebar } from '../../components/sidebar/sidebar';
 
@@ -11,6 +12,11 @@ import { Sidebar } from '../../components/sidebar/sidebar';
 })
 export class UsersPage implements OnInit {
   private userService = inject(UserService);
+  auth = inject(AuthService);
+
+  get userInitial(): string {
+    return (this.auth.currentUser()?.name ?? 'A').charAt(0).toUpperCase();
+  }
 
   readonly totalUsers    = this.userService.totalUsers;
   readonly activeUsers   = this.userService.activeUsers;
