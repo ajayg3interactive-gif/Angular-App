@@ -1,0 +1,154 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold" style="color:var(--text)">Teams</h1>
+      <p class="text-sm mt-0.5" style="color:var(--text-muted)">Manage development teams and their assignments</p>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="rounded-2xl p-5 shadow-sm text-center" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ teamsWithMembers().length }}</p>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">Teams</p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm text-center" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ userSvc.users().length }}</p>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">Total Members</p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm text-center" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ projectSvc.activeProjects() }}</p>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">Active Projects</p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm text-center" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ userSvc.activeUsers() }}</p>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">Active Users</p>
+      </div>
+    </div>
+
+    <!-- Teams Grid -->
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+      @for (team of teamsWithMembers(); track team.id) {
+        <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-bold" style="color:var(--text)">{{ team.name }}</h2>
+              <p class="text-sm mt-0.5" style="color:var(--text-muted)">{{ team.description }}</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-800">
+              {{ team.memberIds.length }} members
+            </span>
+          </div>
+
+          <!-- Team Lead -->
+          @if (team.lead) {
+            <div class="flex items-center gap-3 p-3 rounded-xl mb-4" style="background-color:var(--bg)">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                   style="background-color:var(--accent)">
+                {{ getUserInitial(team.lead.name) }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold" style="color:var(--text)">{{ team.lead.name }}</p>
+                <p class="text-xs text-amber-600 font-medium">Team Lead</p>
+              </div>
+            </div>
+          }
+
+          <!-- Members -->
+          <div class="mb-4">
+            <p class="text-xs font-semibold uppercase tracking-widest mb-2 opacity-50" style="color:var(--text)">Members</p>
+            <div class="flex flex-wrap gap-2">
+              @for (m of team.members; track m.id) {
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium" style="background-color:var(--bg)">
+                  <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                       style="background-color:var(--accent)">
+                    {{ getUserInitial(m.name) }}
+                  </div>
+                  <span style="color:var(--text)">{{ m.name }}</span>
+                  <span class="w-1.5 h-1.5 rounded-full" [class]="m.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Assigned Projects -->
+          @if (team.projects.length > 0) {
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest mb-2 opacity-50" style="color:var(--text)">Projects</p>
+              <div class="space-y-2">
+                @for (p of team.projects; track p.id) {
+                  <div class="flex items-center gap-3 px-3 py-2 rounded-xl" style="background-color:var(--bg)">
+                    <span class="flex-1 text-sm font-medium truncate" style="color:var(--text)">{{ p.title }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium" [class]="statusColor(p.status)">
+                      {{ statusLabel(p.status) }}
+                    </span>
+                    <span class="text-xs font-bold" style="color:var(--text-muted)">{{ p.completion }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- All Users Table -->
+    <div class="rounded-2xl shadow-sm overflow-hidden" style="background-color:var(--card-bg);border:1px solid var(--border)">
+      <div class="px-6 py-4" style="border-bottom:1px solid var(--border)">
+        <h2 class="text-base font-bold" style="color:var(--text)">All Users</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background-color:var(--bg)">
+              <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wide opacity-60" style="color:var(--text)">Name</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wide opacity-60" style="color:var(--text)">Email</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wide opacity-60" style="color:var(--text)">Role</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wide opacity-60" style="color:var(--text)">Department</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wide opacity-60" style="color:var(--text)">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of userSvc.users(); track u.id) {
+              <tr style="border-top:1px solid var(--border)" class="hover:bg-white/5 transition-colors">
+                <td class="px-6 py-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                         [style.background-color]="u.role === 'admin' ? '#6366f1' : u.role === 'developer' ? '#0891b2' : '#059669'">
+                      {{ getUserInitial(u.name) }}
+                    </div>
+                    <span class="font-medium" style="color:var(--text)">{{ u.name }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-3" style="color:var(--text-muted)">{{ u.email }}</td>
+                <td class="px-6 py-3">
+                  <span class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize"
+                    [class]="u.role === 'admin' ? 'bg-indigo-100 text-indigo-800' : u.role === 'developer' ? 'bg-cyan-100 text-cyan-800' : 'bg-emerald-100 text-emerald-800'">
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td class="px-6 py-3 text-xs" style="color:var(--text-muted)">{{ u.department ?? '—' }}</td>
+                <td class="px-6 py-3">
+                  <span class="flex items-center gap-1.5 text-xs font-medium"
+                    [class]="u.status === 'active' ? 'text-emerald-600' : 'text-slate-400'">
+                    <span class="w-1.5 h-1.5 rounded-full" [class]="u.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                    {{ u.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    } <!-- end !loading -->
+  </main>
+</div>

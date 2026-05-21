@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { User } from '../interfaces/user';
+import { User, UserRole } from '../interfaces/user';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -42,12 +42,12 @@ export class UserService {
   }
 
   // POST /users — json-server auto-assigns the id
-  addUser(name: string, email: string, status: 'active' | 'inactive'): void {
-    const today = new Date().toISOString().split('T')[0];
-    this.http
-      .post<User>(this.apiUrl, { name, email, password: '', status, created: today })
-      .subscribe(created => this._users.update(list => [...list, created]));
-  }
+ addUser(name: string, email: string, status: 'active' | 'inactive', role: UserRole): void {
+  const today = new Date().toISOString().split('T')[0];
+  this.http
+    .post<User>(this.apiUrl, { name, email, password: '', role, status, created: today })
+    .subscribe(created => this._users.update(list => [...list, created]));
+}
 
   // PATCH /users/:id — partial update (only the changed fields)
   editUser(id: number, updates: Partial<Omit<User, 'id'>>): void {

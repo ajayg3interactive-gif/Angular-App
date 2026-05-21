@@ -1,0 +1,421 @@
+<div class="flex min-h-screen" style="background-color: var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <div
+      class="p-6 pb-4 flex flex-wrap items-center justify-between gap-4"
+      style="border-bottom: 1px solid var(--border)"
+    >
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--text)">Kanban Board</h1>
+        <p class="text-sm mt-0.5" style="color: var(--text-muted)">
+          {{ boardCards().length }} cards visible
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3 items-center">
+        <!-- Filter: Project -->
+        <select
+          (change)="
+            filterProject.set($any($event.target).value === '' ? '' : +$any($event.target).value)
+          "
+          class="px-3 py-2 rounded-xl text-sm border outline-none"
+          style="background-color: var(--card-bg); color: var(--text); border-color: var(--border)"
+        >
+          <option value="">All Projects</option>
+          @for (p of projectSvc.projects(); track p.id) {
+            <option [value]="p.id">{{ p.title }}</option>
+          }
+        </select>
+        @if (rbac.isAdmin()) {
+          <!-- Filter: Assignee -->
+          <select
+            (change)="
+              filterAssignee.set($any($event.target).value === '' ? '' : +$any($event.target).value)
+            "
+            class="px-3 py-2 rounded-xl text-sm border outline-none"
+            style="
+              background-color: var(--card-bg);
+              color: var(--text);
+              border-color: var(--border);
+            "
+          >
+            <option value="">All Developers</option>
+            @for (u of developers(); track u.id) {
+              <option [value]="u.id">{{ u.name }}</option>
+            }
+          </select>
+          <button
+            (click)="openCreateCard()"
+            class="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2 transition-opacity hover:opacity-80"
+            style="background-color: var(--accent)"
+          >
+            + Card
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center flex-1">
+        <div
+          class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+        ></div>
+      </div>
+    } @else {
+      <!-- Board -->
+      <div class="flex gap-4 p-4 overflow-x-auto flex-1 pb-6" cdkDropListGroup>
+        @for (col of columns; track col.key) {
+          <div
+            class="flex-shrink-0 w-64 flex flex-col rounded-2xl overflow-hidden"
+            style="background-color: var(--card-bg); border: 1px solid var(--border)"
+          >
+            <!-- Column Header -->
+            <div
+              class="px-4 py-3 flex items-center justify-between"
+              [style.border-bottom]="'2px solid ' + col.color"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" [style.background-color]="col.color"></span>
+                <span class="text-sm font-bold" style="color: var(--text)">{{ col.label }}</span>
+                <span
+                  class="text-xs px-1.5 py-0.5 rounded-full font-semibold text-white"
+                  [style.background-color]="col.color"
+                >
+                  {{ getColumn(col.key).length }}
+                </span>
+              </div>
+              @if (rbac.isAdmin()) {
+                <button
+                  (click)="openCreateCard(col.key)"
+                  class="w-6 h-6 rounded-md flex items-center justify-center transition-colors hover:bg-white/20"
+                  style="color: var(--text-muted)"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </button>
+              }
+            </div>
+
+            <!-- Drop Zone -->
+            <div
+              [id]="'col-' + col.key"
+              cdkDropList
+              [cdkDropListData]="getColumn(col.key)"
+              [cdkDropListConnectedTo]="connectedLists()"
+              (cdkDropListDropped)="onDrop($event, col.key)"
+              class="flex-1 p-2 space-y-2 overflow-y-auto min-h-32"
+            >
+              @for (card of getColumn(col.key); track card.id) {
+                <div
+                  cdkDrag
+                  (click)="openCard(card)"
+                  class="p-3 rounded-xl cursor-pointer shadow-sm transition-all hover:shadow-md active:scale-95"
+                  style="background-color: var(--bg); border: 1px solid var(--border)"
+                >
+                  <!-- Priority + Labels -->
+                  <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                    <span
+                      class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide"
+                      [style.background-color]="priorityConfig[card.priority].bg"
+                      [style.color]="priorityConfig[card.priority].color"
+                    >
+                      {{ card.priority }}
+                    </span>
+                    @for (lbl of card.labels.slice(0, 2); track lbl) {
+                      <span
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                      >
+                        {{ lbl }}
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Title -->
+                  <p class="text-xs font-semibold leading-snug mb-2" style="color: var(--text)">
+                    {{ card.title }}
+                  </p>
+
+                  <!-- Progress bar -->
+                  @if (card.completion > 0) {
+                    <div class="h-1 rounded-full bg-slate-200 dark:bg-slate-700 mb-2">
+                      <div
+                        class="h-1 rounded-full"
+                        [style.width.%]="card.completion"
+                        [style.background-color]="col.color"
+                      ></div>
+                    </div>
+                  }
+
+                  <!-- Footer -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <div class="flex -space-x-1">
+                        @for (aid of card.assignedTo.slice(0, 3); track aid) {
+                          <div
+                            class="w-5 h-5 rounded-full text-[9px] font-bold text-white flex items-center justify-center ring-1 ring-white/20"
+                            style="background-color: var(--accent)"
+                            [title]="getUserName(aid)"
+                          >
+                            {{ getUserName(aid).charAt(0) }}
+                          </div>
+                        }
+                      </div>
+                      @if (card.assignedTo.length === 0) {
+                        <span class="text-[10px]" style="color: var(--text-muted)">Unassigned</span>
+                      } @else if (card.assignedTo.length > 1) {
+                        <span class="text-[10px]" style="color: var(--text-muted)"
+                          >{{ card.assignedTo.length }} devs</span
+                        >
+                      } @else {
+                        <span class="text-[10px]" style="color: var(--text-muted)">{{
+                          getUserName(card.assignedTo[0])
+                        }}</span>
+                      }
+                    </div>
+                    @if (card.dueDate) {
+                      <span
+                        class="text-[10px] font-semibold"
+                        [class]="isOverdue(card.dueDate) ? 'text-red-500' : 'text-slate-400'"
+                      >
+                        {{ card.dueDate }}
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Drag handle preview -->
+                  <div
+                    *cdkDragPlaceholder
+                    class="h-20 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 border-2 border-dashed border-indigo-300"
+                  ></div>
+                </div>
+              } @empty {
+                <div class="flex flex-col items-center justify-center py-6 opacity-40">
+                  <svg
+                    class="w-8 h-8 mb-1"
+                    style="color: var(--text-muted)"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  <p class="text-xs" style="color: var(--text-muted)">Drop here</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+    <!-- end !loading -->
+  </main>
+</div>
+
+<!-- Card Detail/Edit Modal -->
+@if (showCardModal()) {
+  <div
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+  >
+    <div
+      class="w-full max-w-lg rounded-2xl shadow-2xl p-6 my-8"
+      style="background-color: var(--card-bg)"
+    >
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-bold" style="color: var(--text)">
+          {{ selectedCard() ? 'Edit Card' : 'New Card' }}
+        </h2>
+        <button
+          (click)="showCardModal.set(false)"
+          style="color: var(--text-muted)"
+          class="hover:opacity-70"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <input
+          [(ngModel)]="cardForm().title"
+          placeholder="Card title *"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none"
+          style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+        />
+        <textarea
+          [(ngModel)]="cardForm().description"
+          placeholder="Description"
+          rows="3"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none resize-none"
+          style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+        ></textarea>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1">
+            <label for="">Priority</label>
+            <select
+              [(ngModel)]="cardForm().priority"
+              class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+              style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="">Projcet</label>
+            <select
+              [(ngModel)]="cardForm().projectId"
+              class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+              style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+            >
+              @for (p of projectSvc.projects(); track p.id) {
+                <option [value]="p.id">{{ p.title }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-3">
+          <!-- Multi-select Assignee -->
+          <div class="flex flex-col gap-1">
+            <label for="">Assignee</label>
+
+            <div class="relative">
+              <button
+                type="button"
+                (click)="showAssigneeDropdown.set(!showAssigneeDropdown())"
+                class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none text-left flex items-start justify-between gap-2 min-h-10.5"
+                style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+              >
+                <div class="flex flex-wrap gap-1 flex-1">
+                  @if (cardForm().assignedTo.length === 0) {
+                    <span style="color: var(--text-muted)">Unassigned</span>
+                  }
+                  @for (id of cardForm().assignedTo; track id) {
+                    <span
+                      class="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full text-white"
+                      style="background-color: var(--accent)"
+                    >
+                      {{ getUserName(id) }}
+                      <span
+                        (click)="$event.stopPropagation(); toggleAssignee(id)"
+                        class="cursor-pointer hover:opacity-70 leading-none"
+                        >&times;</span
+                      >
+                    </span>
+                  }
+                </div>
+                <svg
+                  class="w-4 h-4 shrink-0 mt-0.5 transition-transform"
+                  [class.rotate-180]="showAssigneeDropdown()"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              @if (showAssigneeDropdown()) {
+                <div
+                  class="absolute top-full left-0 right-0 mt-1 rounded-xl shadow-lg border z-20 max-h-44 overflow-y-auto"
+                  style="background-color: var(--card-bg); border-color: var(--border)"
+                >
+                  @for (u of developers(); track u.id) {
+                    <label
+                      class="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-white/5 select-none"
+                    >
+                      <input
+                        type="checkbox"
+                        [checked]="cardForm().assignedTo.includes(u.id)"
+                        (change)="toggleAssignee(u.id)"
+                        class="w-4 h-4 rounded accent-indigo-500"
+                      />
+                      <span class="text-sm" style="color: var(--text)">{{ u.name }}</span>
+                    </label>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="">Due Date</label>
+          <input
+            type="date"
+            [(ngModel)]="cardForm().dueDate"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+          />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <input
+            [(ngModel)]="cardForm().labels"
+            placeholder="Labels (comma separated)"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+          />
+          <input
+            type="number"
+            [(ngModel)]="cardForm().estimatedHours"
+            placeholder="Est. hours"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color: var(--bg); color: var(--text); border-color: var(--border)"
+          />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-6">
+        @if (selectedCard() && rbac.isAdmin()) {
+          <button
+            (click)="deleteCard(selectedCard()!.id)"
+            class="px-4 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+          >
+            Delete
+          </button>
+        } @else {
+          <span></span>
+        }
+        <div class="flex gap-3">
+          <button
+            (click)="showCardModal.set(false)"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/10"
+            style="border-color: var(--border); color: var(--text)"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="saveCard()"
+            [disabled]="saving()"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+            style="background-color: var(--accent)"
+          >
+            {{ saving() ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

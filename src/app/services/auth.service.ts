@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { User } from '../interfaces/user';
 import { AuthUser } from '../interfaces/auth-user';
+import { ROLE_DEFINITIONS } from '../interfaces/rbac';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
       id:      user.id,
       name:    user.name,
       email:   user.email,
-      role:    'admin',
+      role:    user.role ?? 'developer',
       token:   btoa(`${user.email}:${Date.now()}`),
       loginAt: new Date().toISOString(),
     };
@@ -52,6 +53,13 @@ export class AuthService {
   /** Returns current user snapshot (null if not logged in). */
   getCurrentUser(): AuthUser | null {
     return this._currentUser();
+  }
+
+  /** Navigate to role-based default dashboard. */
+  navigateToDashboard(): void {
+    const role = this._currentUser()?.role ?? 'developer';
+    const route = ROLE_DEFINITIONS[role as keyof typeof ROLE_DEFINITIONS]?.defaultRoute ?? '/dashboard';
+    this.router.navigate([route]);
   }
 
   /** Update the stored user (e.g. after profile edit). */

@@ -62,9 +62,15 @@ export class Login {
           this.authService.login(users[0]);
           this.loginMessage = { type: 'success', text: 'Login successful! Redirecting…' };
 
-          // Redirect to originally requested URL or dashboard
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-          setTimeout(() => this.router.navigateByUrl(returnUrl), 800);
+          // Redirect to originally requested URL, otherwise role-based dashboard
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+          setTimeout(() => {
+            if (returnUrl && returnUrl !== '/dashboard') {
+              this.router.navigateByUrl(returnUrl);
+            } else {
+              this.authService.navigateToDashboard();
+            }
+          }, 800);
         } else {
           this.loginMessage = { type: 'error', text: 'Invalid email or password. Please try again.' };
           this.isSubmitting = false;

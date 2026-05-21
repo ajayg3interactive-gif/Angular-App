@@ -1,0 +1,179 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold" style="color:var(--text)">Developer Dashboard</h1>
+        <p class="text-sm mt-0.5" style="color:var(--text-muted)">
+          Hello, <span class="font-semibold" style="color:var(--accent)">{{ auth.currentUser()?.name }}</span> — here's your workload
+        </p>
+      </div>
+      <div class="flex gap-3 items-center">
+        <a routerLink="/my-tasks" class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-80" style="background-color:var(--accent)">
+          My Tasks
+        </a>
+        <a routerLink="/notifications" class="relative p-2.5 rounded-xl transition-colors hover:bg-white/10">
+          <svg class="w-5 h-5" style="color:var(--text)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          @if (notifSvc.unreadCount() > 0) {
+            <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+              {{ notifSvc.unreadCount() }}
+            </span>
+          }
+        </a>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-sm font-medium mb-1" style="color:var(--text-muted)">Assigned Tasks</p>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ myCards().length }}</p>
+        <p class="text-xs mt-1 text-cyan-500 font-medium">{{ activeTasks().length }} active</p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-sm font-medium mb-1" style="color:var(--text-muted)">Completed</p>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ completedTasks().length }}</p>
+        <p class="text-xs mt-1 text-emerald-500 font-medium">
+          @if (myCards().length > 0) { {{ ((completedTasks().length / myCards().length) * 100) | number:'1.0-0' }}% done }
+        </p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-sm font-medium mb-1" style="color:var(--text-muted)">Hours Logged</p>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ totalHoursLogged() }}</p>
+        <p class="text-xs mt-1 text-indigo-500 font-medium">across all tasks</p>
+      </div>
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-sm font-medium mb-1" style="color:var(--text-muted)">Overdue</p>
+        <p class="text-3xl font-bold" [class]="overdueCount() > 0 ? 'text-red-500' : 'text-emerald-500'" style="color:inherit">
+          {{ overdueCount() }}
+        </p>
+        <p class="text-xs mt-1 font-medium" [class]="overdueCount() > 0 ? 'text-red-400' : 'text-emerald-400'">
+          {{ overdueCount() > 0 ? 'needs attention' : 'all on time' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+
+      <!-- In Progress -->
+      <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-bold" style="color:var(--text)">In Progress</h2>
+          <a routerLink="/kanban" class="text-sm font-medium" style="color:var(--accent)">View board</a>
+        </div>
+        @if (inProgressCards().length === 0) {
+          <p class="text-sm text-center py-6" style="color:var(--text-muted)">No tasks in progress</p>
+        } @else {
+          <div class="space-y-3">
+            @for (c of inProgressCards(); track c.id) {
+              <div class="p-4 rounded-xl" style="background-color:var(--bg)">
+                <div class="flex items-start justify-between mb-2">
+                  <p class="text-sm font-semibold leading-snug flex-1 pr-2" style="color:var(--text)">{{ c.title }}</p>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
+                    [style.background-color]="priorityConfig[c.priority].bg"
+                    [style.color]="priorityConfig[c.priority].color">
+                    {{ c.priority }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+                    <div class="h-1.5 rounded-full bg-amber-500" [style.width.%]="c.completion"></div>
+                  </div>
+                  <span class="text-xs font-medium" style="color:var(--text-muted)">{{ c.completion }}%</span>
+                </div>
+                <p class="text-xs" [class]="isOverdue(c.dueDate) ? 'text-red-500 font-semibold' : ''" style="color:var(--text-muted)">
+                  Due {{ c.dueDate }} {{ isOverdue(c.dueDate) ? '· OVERDUE' : '' }}
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- In Review / Testing -->
+      <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-bold" style="color:var(--text)">In Review / Testing</h2>
+          <span class="text-sm font-medium text-purple-500">{{ reviewCards().length }} items</span>
+        </div>
+        @if (reviewCards().length === 0) {
+          <p class="text-sm text-center py-6" style="color:var(--text-muted)">Nothing awaiting review</p>
+        } @else {
+          <div class="space-y-3">
+            @for (c of reviewCards(); track c.id) {
+              <div class="p-4 rounded-xl flex items-center gap-3" style="background-color:var(--bg)">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  [class]="c.status === 'testing' ? 'bg-purple-100 text-purple-600' : 'bg-cyan-100 text-cyan-600'">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold truncate" style="color:var(--text)">{{ c.title }}</p>
+                  <p class="text-xs" style="color:var(--text-muted)">{{ c.completion }}% complete</p>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium" [class]="statusColor(c.status)">
+                  {{ statusLabel(c.status) }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Active Projects -->
+    <div class="rounded-2xl p-6 shadow-sm mb-8" style="background-color:var(--card-bg);border:1px solid var(--border)">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-base font-bold" style="color:var(--text)">My Active Projects</h2>
+        <a routerLink="/projects" class="text-sm font-medium" style="color:var(--accent)">View all</a>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (p of activeProjects(); track p.id) {
+          <div class="p-4 rounded-xl" style="background-color:var(--bg)">
+            <p class="text-sm font-bold mb-1" style="color:var(--text)">{{ p.title }}</p>
+            <p class="text-xs mb-3 line-clamp-2" style="color:var(--text-muted)">{{ p.description }}</p>
+            <div class="flex items-center gap-2">
+              <div class="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+                <div class="h-1.5 rounded-full bg-indigo-500" [style.width.%]="p.completion"></div>
+              </div>
+              <span class="text-xs font-semibold" style="color:var(--text-muted)">{{ p.completion }}%</span>
+            </div>
+          </div>
+        }
+        @empty {
+          <p class="text-sm col-span-3 text-center py-4" style="color:var(--text-muted)">No projects assigned yet</p>
+        }
+      </div>
+    </div>
+
+    <!-- Upcoming Deadlines -->
+    @if (upcomingDeadlines().length > 0) {
+      <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <h2 class="text-base font-bold mb-5" style="color:var(--text)">Upcoming Deadlines (7 days)</h2>
+        <div class="space-y-2">
+          @for (c of upcomingDeadlines(); track c.id) {
+            <div class="flex items-center gap-4 p-3 rounded-xl" style="background-color:var(--bg)">
+              <div class="w-2 h-2 rounded-full shrink-0" [class]="isOverdue(c.dueDate) ? 'bg-red-500' : 'bg-amber-500'"></div>
+              <span class="flex-1 text-sm font-medium truncate" style="color:var(--text)">{{ c.title }}</span>
+              <span class="text-xs font-semibold" [class]="isOverdue(c.dueDate) ? 'text-red-500' : 'text-amber-500'">{{ c.dueDate }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    } <!-- end !loading -->
+  </main>
+</div>

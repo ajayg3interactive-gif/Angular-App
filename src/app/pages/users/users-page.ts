@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
-import { User } from '../../interfaces/user';
+import { User, UserRole } from '../../interfaces/user';
 import { Sidebar } from '../../components/sidebar/sidebar';
 
 @Component({
@@ -18,13 +18,13 @@ export class UsersPage implements OnInit {
     return (this.auth.currentUser()?.name ?? 'A').charAt(0).toUpperCase();
   }
 
-  readonly totalUsers    = this.userService.totalUsers;
-  readonly activeUsers   = this.userService.activeUsers;
+  readonly totalUsers = this.userService.totalUsers;
+  readonly activeUsers = this.userService.activeUsers;
   readonly inactiveUsers = this.userService.inactiveUsers;
 
   readonly pageSize = 8;
-  searchQuery  = signal('');
-  currentPage  = signal(1);
+  searchQuery = signal('');
+  currentPage = signal(1);
 
   filteredUsers = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -47,13 +47,14 @@ export class UsersPage implements OnInit {
     Array.from({ length: this.totalPages() }, (_, i) => i + 1)
   );
 
-  isModalOpen  = signal(false);
-  isEditMode   = signal(false);
-  editingId    = signal<number | null>(null);
+  isModalOpen = signal(false);
+  isEditMode = signal(false);
+  editingId = signal<number | null>(null);
 
   // Form signals — formIsActive is a boolean for the toggle UI
-  formName     = signal('');
-  formEmail    = signal('');
+  formName = signal('');
+  formEmail = signal('');
+  formRole = signal<UserRole>('developer');
   formIsActive = signal(true);
 
   ngOnInit(): void {
@@ -76,6 +77,7 @@ export class UsersPage implements OnInit {
     this.editingId.set(null);
     this.formName.set('');
     this.formEmail.set('');
+    this.formRole.set('developer');
     this.formIsActive.set(true);
     this.isModalOpen.set(true);
   }
@@ -87,6 +89,7 @@ export class UsersPage implements OnInit {
     this.formEmail.set(user.email);
     this.formIsActive.set(user.status === 'active');
     this.isModalOpen.set(true);
+    this.formRole.set(user.role);
   }
 
   closeModal(): void {
@@ -94,18 +97,19 @@ export class UsersPage implements OnInit {
   }
 
   saveUser(): void {
-    const name   = this.formName().trim();
-    const email  = this.formEmail().trim();
+    const name = this.formName().trim();
+    const email = this.formEmail().trim();
     const status: 'active' | 'inactive' = this.formIsActive() ? 'active' : 'inactive';
+    const role = this.formRole();
     if (!name || !email) return;
 
     if (this.isEditMode()) {
       const id = this.editingId();
       if (id !== null) {
-        this.userService.editUser(id, { name, email, status });
+        this.userService.editUser(id, { name, email, status, role });
       }
     } else {
-      this.userService.addUser(name, email, status);
+      this.userService.addUser(name, email, status, role);
     }
     this.closeModal();
   }
@@ -131,6 +135,10 @@ export class UsersPage implements OnInit {
 
   onFormEmail(event: Event): void {
     this.formEmail.set((event.target as HTMLInputElement).value);
+  }
+
+  onFormRole(event: Event): void {
+    this.formRole.set((event.target as HTMLSelectElement).value as UserRole);
   }
 
   toggleClass(isActive: boolean): string {

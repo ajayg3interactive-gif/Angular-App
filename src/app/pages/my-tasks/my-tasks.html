@@ -1,0 +1,118 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold" style="color:var(--text)">My Tasks</h1>
+      <p class="text-sm mt-0.5" style="color:var(--text-muted)">All tasks assigned to you</p>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div class="rounded-2xl p-4 text-center shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-2xl font-black" style="color:var(--text)">{{ stats().total }}</p>
+        <p class="text-xs mt-0.5" style="color:var(--text-muted)">Total</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-2xl font-black text-amber-500">{{ stats().active }}</p>
+        <p class="text-xs mt-0.5" style="color:var(--text-muted)">Active</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-2xl font-black text-emerald-500">{{ stats().completed }}</p>
+        <p class="text-xs mt-0.5" style="color:var(--text-muted)">Done</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-2xl font-black" [class]="stats().overdue > 0 ? 'text-red-500' : 'text-emerald-500'">{{ stats().overdue }}</p>
+        <p class="text-xs mt-0.5" style="color:var(--text-muted)">Overdue</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center shadow-sm col-span-2 lg:col-span-1" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <p class="text-2xl font-black" style="color:var(--text)">{{ stats().hoursLogged }}<span class="text-sm font-normal">/{{ stats().hoursEstimated }}h</span></p>
+        <p class="text-xs mt-0.5" style="color:var(--text-muted)">Hours logged</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <input [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+        placeholder="Search tasks..."
+        class="flex-1 min-w-48 px-4 py-2 rounded-xl text-sm border outline-none"
+        style="background-color:var(--card-bg);color:var(--text);border-color:var(--border)"/>
+      <select (change)="filterStatus.set($any($event.target).value)"
+        class="px-4 py-2 rounded-xl text-sm border outline-none"
+        style="background-color:var(--card-bg);color:var(--text);border-color:var(--border)">
+        <option value="">All statuses</option>
+        @for (col of columns; track col.key) { <option [value]="col.key">{{ col.label }}</option> }
+      </select>
+    </div>
+
+    <!-- Task List -->
+    <div class="space-y-3">
+      @for (c of filtered(); track c.id) {
+        <div class="rounded-2xl p-5 shadow-sm transition-all hover:shadow-md"
+             style="background-color:var(--card-bg);border:1px solid var(--border)">
+          <div class="flex flex-wrap items-start gap-4">
+
+            <!-- Left -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="text-xs px-2 py-0.5 rounded-full font-bold uppercase"
+                  [style.background-color]="priorityConfig[c.priority].bg"
+                  [style.color]="priorityConfig[c.priority].color">
+                  {{ c.priority }}
+                </span>
+                @for (lbl of c.labels; track lbl) {
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ lbl }}</span>
+                }
+              </div>
+              <p class="text-sm font-bold leading-snug mb-1" style="color:var(--text)">{{ c.title }}</p>
+              <p class="text-xs line-clamp-2 mb-2" style="color:var(--text-muted)">{{ c.description }}</p>
+              <div class="flex items-center gap-4 text-xs" style="color:var(--text-muted)">
+                <span>📁 {{ getProjectName(c.projectId) }}</span>
+                <span [class]="isOverdue(c.dueDate) ? 'text-red-500 font-semibold' : ''">
+                  📅 {{ c.dueDate }} {{ isOverdue(c.dueDate) ? '· OVERDUE' : '' }}
+                </span>
+                <span>⏱ {{ c.loggedHours }}/{{ c.estimatedHours }}h</span>
+              </div>
+            </div>
+
+            <!-- Right: Status + Progress -->
+            <div class="flex flex-col items-end gap-2 shrink-0">
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="statusColor(c.status)">
+                {{ statusLabel(c.status) }}
+              </span>
+              <p class="text-xs font-bold" style="color:var(--text)">{{ c.completion }}%</p>
+              <!-- Quick status update -->
+              <select (change)="updateStatus(c, $any($event.target).value)"
+                [value]="c.status"
+                class="text-xs px-2 py-1 rounded-lg border outline-none"
+                style="background-color:var(--bg);color:var(--text);border-color:var(--border)">
+                @for (col of columns; track col.key) { <option [value]="col.key">{{ col.label }}</option> }
+              </select>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+            <div class="h-1.5 rounded-full transition-all"
+              [style.width.%]="c.completion"
+              [style.background-color]="c.completion >= 100 ? '#10b981' : c.completion >= 50 ? '#6366f1' : '#f59e0b'"></div>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="text-center py-16">
+          <p class="text-lg font-semibold mb-2" style="color:var(--text)">No tasks found</p>
+          <p style="color:var(--text-muted)">You have no tasks matching the current filter</p>
+        </div>
+      }
+    </div>
+
+    } <!-- end !loading -->
+  </main>
+</div>

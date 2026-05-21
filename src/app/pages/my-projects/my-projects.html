@@ -1,0 +1,112 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold" style="color:var(--text)">My Projects</h1>
+      <p class="text-sm mt-0.5" style="color:var(--text-muted)">Track progress on your purchased projects</p>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else if (myProjects().length === 0) {
+      <div class="text-center py-24">
+        <svg class="w-16 h-16 mx-auto mb-4 opacity-20" style="color:var(--text)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586l5.414 5.414V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h2 class="text-xl font-bold mb-2" style="color:var(--text)">No Projects Yet</h2>
+        <p style="color:var(--text-muted)">Contact your account manager to get started</p>
+      </div>
+    } @else {
+
+    <div class="space-y-8">
+      @for (p of myProjects(); track p.id) {
+        <div class="rounded-2xl overflow-hidden shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+
+          <!-- Project Header -->
+          <div class="p-6" style="border-bottom:1px solid var(--border)">
+            <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <div>
+                <div class="flex items-center gap-3 mb-1">
+                  <h2 class="text-lg font-bold" style="color:var(--text)">{{ p.title }}</h2>
+                  <span class="text-xs px-2.5 py-1 rounded-full font-semibold" [class]="statusColor(p.status)">
+                    {{ statusLabel(p.status) }}
+                  </span>
+                </div>
+                <p class="text-sm leading-relaxed" style="color:var(--text-muted)">{{ p.description }}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-3xl font-black" style="color:var(--accent)">{{ p.completion }}%</p>
+                <p class="text-xs" style="color:var(--text-muted)">complete</p>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="h-3 rounded-full bg-slate-200 dark:bg-slate-700 mb-3 overflow-hidden">
+              <div class="h-3 rounded-full transition-all duration-700"
+                [style.width.%]="p.completion"
+                [style.background]="'linear-gradient(90deg, var(--accent), #10b981)'"></div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <div>
+                <p class="text-xs font-medium mb-0.5" style="color:var(--text-muted)">Start Date</p>
+                <p class="font-semibold" style="color:var(--text)">{{ p.startDate }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium mb-0.5" style="color:var(--text-muted)">Delivery</p>
+                <p class="font-semibold" style="color:var(--text)">{{ p.endDate }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium mb-0.5" style="color:var(--text-muted)">Budget</p>
+                <p class="font-semibold" style="color:var(--text)">{{ formatCurrency(p.budget) }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium mb-0.5" style="color:var(--text-muted)">Priority</p>
+                <p class="font-semibold capitalize" style="color:var(--text)">{{ p.priority }}</p>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              @for (tag of p.tags; track tag) {
+                <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 font-medium">
+                  {{ tag }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Milestones -->
+          @if (getProjectMilestones(p.id).length > 0) {
+            <div class="p-6">
+              <h3 class="text-sm font-bold mb-4" style="color:var(--text)">Milestones</h3>
+              <div class="space-y-3">
+                @for (m of getProjectMilestones(p.id); track m.id) {
+                  <div class="flex items-center gap-4 p-3 rounded-xl" style="background-color:var(--bg)">
+                    <span class="text-lg shrink-0">{{ milestoneIcon(m.status) }}</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-semibold" style="color:var(--text)">{{ m.title }}</p>
+                      <p class="text-xs" style="color:var(--text-muted)">Due {{ m.dueDate }}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <p class="text-sm font-bold" style="color:var(--text)">{{ m.completion }}%</p>
+                      <span class="text-xs px-2 py-0.5 rounded-full font-medium" [class]="statusColor(m.status)">
+                        {{ statusLabel(m.status) }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    } <!-- end !loading && projects -->
+  </main>
+</div>

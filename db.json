@@ -2,59 +2,432 @@
   "users": [
     {
       "id": 1,
-      "name": "Alice Johnson",
-      "email": "alice@example.com",
-      "password": "password123",
-      "status": "inactive",
-      "created": "2024-01-15"
+      "name": "Alex Admin",
+      "email": "admin@pm.com",
+      "password": "admin123",
+      "role": "admin",
+      "status": "active",
+      "avatar": null,
+      "department": "Management",
+      "phone": "+1-555-0101",
+      "created": "2026-01-01"
     },
     {
       "id": 2,
-      "name": "Bob Smith",
-      "email": "bob@example.com",
-      "password": "password123",
-      "status": "inactive",
-      "created": "2024-02-20"
+      "name": "John Developer",
+      "email": "dev@pm.com",
+      "password": "dev123",
+      "role": "developer",
+      "status": "active",
+      "avatar": null,
+      "department": "Engineering",
+      "phone": "+1-555-0102",
+      "created": "2026-01-15"
     },
     {
       "id": 3,
-      "name": "Carol Williams",
-      "email": "carol@example.com",
-      "password": "password123",
+      "name": "Sarah Developer",
+      "email": "sarah@pm.com",
+      "password": "sarah123",
+      "role": "developer",
       "status": "active",
-      "created": "2024-03-10"
+      "avatar": null,
+      "department": "Engineering",
+      "phone": "+1-555-0103",
+      "created": "2026-02-01"
     },
     {
       "id": 4,
-      "name": "David Brown",
-      "email": "david@example.com",
-      "password": "password123",
+      "name": "Alice Client",
+      "email": "client@pm.com",
+      "password": "client123",
+      "role": "client",
       "status": "active",
-      "created": "2024-04-05"
+      "avatar": null,
+      "department": null,
+      "phone": "+1-555-0104",
+      "created": "2026-02-15"
     },
     {
       "id": 5,
-      "name": "Eva Martinez",
-      "email": "eva@example.com",
-      "password": "password123",
-      "status": "inactive",
-      "created": "2024-05-12"
+      "name": "Bob Client",
+      "email": "bob@pm.com",
+      "password": "bob123",
+      "role": "client",
+      "status": "active",
+      "avatar": null,
+      "department": null,
+      "phone": "+1-555-0105",
+      "created": "2026-03-01"
+    },
+    {
+      "name": "Ajay Developer",
+      "email": "ajay.pm@dev.com",
+      "password": "",
+      "status": "active",
+      "created": "2026-05-21",
+      "id": 7,
+      "role": "developer"
+    },
+    {
+      "name": "Vishnu Developer",
+      "email": "vivi@gmail.com",
+      "password": "",
+      "role": "developer",
+      "status": "active",
+      "created": "2026-05-21",
+      "id": 8
+    }
+  ],
+  "projects": [
+    {
+      "id": 2,
+      "title": "Mobile Banking App",
+      "description": "Secure mobile banking application with biometric authentication and real-time transactions",
+      "status": "in_progress",
+      "priority": "high",
+      "clientId": 5,
+      "teamId": 1,
+      "budget": 80000,
+      "spent": 45000,
+      "startDate": "2026-02-01",
+      "endDate": "2026-08-31",
+      "completion": 40,
+      "tags": [
+        "flutter",
+        "firebase",
+        "fintech"
+      ],
+      "created": "2026-01-28"
+    },
+    {
+      "id": 3,
+      "title": "HR Management System",
+      "description": "Complete HR solution with payroll, leave management, and performance tracking",
+      "status": "planning",
+      "priority": "medium",
+      "clientId": 4,
+      "teamId": 1,
+      "budget": 35000,
+      "spent": 5000,
+      "startDate": "2026-04-01",
+      "endDate": "2026-10-31",
+      "completion": 10,
+      "tags": [
+        "angular",
+        "postgresql",
+        "docker"
+      ],
+      "created": "2026-03-15"
+    },
+    {
+      "id": 4,
+      "title": "CRM Dashboard",
+      "description": "Customer relationship management system with analytics and automation",
+      "status": "completed",
+      "priority": "medium",
+      "clientId": 5,
+      "teamId": 1,
+      "budget": 28000,
+      "spent": 27500,
+      "startDate": "2025-09-01",
+      "endDate": "2026-01-31",
+      "completion": 100,
+      "tags": [
+        "vue",
+        "graphql"
+      ],
+      "created": "2025-08-20"
+    },
+    {
+      "id": 5,
+      "title": "AI Chatbot Integration",
+      "description": "Intelligent customer support chatbot with NLP and automated ticket routing",
+      "status": "on_hold",
+      "priority": "low",
+      "clientId": 4,
+      "teamId": 1,
+      "budget": 22000,
+      "spent": 8000,
+      "startDate": "2026-03-01",
+      "endDate": "2026-09-30",
+      "completion": 25,
+      "tags": [
+        "python",
+        "openai",
+        "websocket"
+      ],
+      "created": "2026-02-20"
+    },
+    {
+      "title": "Zenova Build",
+      "description": "Create a fully professional enterprise-grade Project Management System similar to Jira/Trello/Asana with complete role-based access control and modern UI/UX.",
+      "status": "in_progress",
+      "priority": "medium",
+      "budget": 150000,
+      "spent": 0,
+      "startDate": "2026-05-21",
+      "endDate": "2026-07-01",
+      "tags": [
+        "React",
+        "Springboot",
+        "MySql"
+      ],
+      "completion": 0,
+      "clientId": 4,
+      "teamId": 1,
+      "created": "2026-05-21",
+      "id": 6
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Core Dev Team",
+      "description": "Primary full-stack development team handling all active projects",
+      "memberIds": [
+        2,
+        3
+      ],
+      "leadId": 2,
+      "projectIds": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "created": "2026-01-01"
+    },
+    {
+      "id": 2,
+      "name": "QA Team",
+      "description": "Quality assurance and testing specialists",
+      "memberIds": [
+        3
+      ],
+      "leadId": 3,
+      "projectIds": [
+        1,
+        2
+      ],
+      "created": "2026-02-01"
+    }
+  ],
+  "cards": [
+    {
+      "title": "1st Meeting",
+      "description": "Conduct the Meeting , focus in work flow and the requirements .",
+      "priority": "medium",
+      "projectId": 6,
+      "assignedTo": [
+        2,
+        7,
+        8
+      ],
+      "dueDate": "2026-05-21",
+      "labels": [],
+      "estimatedHours": 2,
+      "status": "backlog",
+      "completion": 0,
+      "loggedHours": 0,
+      "clientId": 4,
+      "created": "2026-05-21",
+      "id": 1
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "cardId": 3,
+      "userId": 2,
+      "text": "Working on JWT token refresh mechanism. Rate limiting middleware is also ready.",
+      "created": "2026-05-20T09:30:00"
+    },
+    {
+      "id": 2,
+      "cardId": 3,
+      "userId": 1,
+      "text": "Great progress! Make sure to add brute-force protection and audit logging.",
+      "created": "2026-05-20T10:15:00"
+    },
+    {
+      "id": 3,
+      "cardId": 8,
+      "userId": 3,
+      "text": "UI is complete. Moving to QA testing phase. PDF export needs minor fixes.",
+      "created": "2026-05-19T14:00:00"
+    },
+    {
+      "id": 4,
+      "cardId": 9,
+      "userId": 2,
+      "text": "Firebase integration is done. Testing on real devices now.",
+      "created": "2026-05-18T11:00:00"
+    },
+    {
+      "id": 5,
+      "cardId": 11,
+      "userId": 3,
+      "text": "Awaiting client approval on the payroll dashboard mockups.",
+      "created": "2026-05-17T15:30:00"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "userId": 2,
+      "title": "Task Assigned",
+      "message": "Shopping cart & wishlist feature has been assigned to you",
+      "type": "info",
+      "read": false,
+      "created": "2026-05-20T08:00:00",
+      "link": "/kanban"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "title": "Deadline Approaching",
+      "message": "User authentication module is due in 5 days",
+      "type": "warning",
+      "read": false,
+      "created": "2026-05-20T07:00:00",
+      "link": "/kanban"
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "title": "New Project Created",
+      "message": "HR Management System project has been added to the pipeline",
+      "type": "success",
+      "read": true,
+      "created": "2026-03-15T09:00:00",
+      "link": "/projects"
+    },
+    {
+      "id": 4,
+      "userId": 4,
+      "title": "Project Update",
+      "message": "E-Commerce Platform is now 64% complete — on track for delivery",
+      "type": "info",
+      "read": false,
+      "created": "2026-05-18T10:00:00",
+      "link": "/my-projects"
+    },
+    {
+      "id": 5,
+      "userId": 3,
+      "title": "Review Requested",
+      "message": "Push notification system is ready for your review",
+      "type": "info",
+      "read": false,
+      "created": "2026-05-18T11:30:00",
+      "link": "/kanban"
     },
     {
       "id": 6,
-      "name": "Test User",
-      "email": "test@example.com",
-      "password": "12345678",
-      "status": "active",
-      "created": "2024-01-01"
+      "userId": 5,
+      "title": "Milestone Reached",
+      "message": "Mobile Banking App beta testing phase has started",
+      "type": "success",
+      "read": false,
+      "created": "2026-05-17T09:00:00",
+      "link": "/my-projects"
     },
     {
-      "name": "ajay1",
-      "email": "ajay1@example.com",
-      "password": "12345678",
-      "status": "active",
-      "created": "2026-05-21",
-      "id": 7
+      "id": 7,
+      "userId": 1,
+      "title": "Budget Alert",
+      "message": "E-Commerce Platform has consumed 64% of the allocated budget",
+      "type": "warning",
+      "read": true,
+      "created": "2026-05-16T14:00:00",
+      "link": "/projects"
+    },
+    {
+      "id": 8,
+      "userId": 2,
+      "title": "Task Completed",
+      "message": "Database schema design has been marked as completed",
+      "type": "success",
+      "read": true,
+      "created": "2026-02-06T09:00:00",
+      "link": "/kanban"
+    }
+  ],
+  "milestones": [
+    {
+      "id": 3,
+      "projectId": 2,
+      "title": "Beta Testing",
+      "description": "Internal beta with 100 limited users across iOS and Android",
+      "dueDate": "2026-06-30",
+      "status": "in_progress",
+      "completion": 45
+    },
+    {
+      "id": 4,
+      "projectId": 2,
+      "title": "Public Launch",
+      "description": "App Store and Play Store public release",
+      "dueDate": "2026-08-31",
+      "status": "pending",
+      "completion": 15
+    },
+    {
+      "id": 5,
+      "projectId": 3,
+      "title": "Design Phase Complete",
+      "description": "All wireframes, mockups, and prototypes approved by client",
+      "dueDate": "2026-05-25",
+      "status": "in_progress",
+      "completion": 80
+    }
+  ],
+  "activity_logs": [
+    {
+      "id": 1,
+      "userId": 2,
+      "action": "moved_card",
+      "entity": "card",
+      "entityId": 3,
+      "detail": "Moved 'User authentication module' from todo → in_progress",
+      "created": "2026-05-20T09:30:00"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "action": "assigned_developer",
+      "entity": "card",
+      "entityId": 5,
+      "detail": "Assigned 'Shopping cart feature' to John Developer",
+      "created": "2026-05-20T10:15:00"
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "action": "moved_card",
+      "entity": "card",
+      "entityId": 8,
+      "detail": "Moved 'Transaction history' from in_progress → testing",
+      "created": "2026-05-19T14:00:00"
+    },
+    {
+      "id": 4,
+      "userId": 1,
+      "action": "created_project",
+      "entity": "project",
+      "entityId": 3,
+      "detail": "Created project 'HR Management System'",
+      "created": "2026-03-15T09:00:00"
+    },
+    {
+      "id": 5,
+      "userId": 2,
+      "action": "completed_card",
+      "entity": "card",
+      "entityId": 1,
+      "detail": "Completed 'Setup project structure & CI/CD pipeline'",
+      "created": "2026-02-01T17:00:00"
     }
   ]
 }

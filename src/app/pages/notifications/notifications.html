@@ -1,0 +1,83 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold" style="color:var(--text)">Notifications</h1>
+        <p class="text-sm mt-0.5" style="color:var(--text-muted)">{{ notifSvc.unreadCount() }} unread</p>
+      </div>
+      @if (notifSvc.unreadCount() > 0) {
+        <button (click)="markAllRead()"
+          class="px-4 py-2 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/10"
+          style="border-color:var(--border);color:var(--text)">
+          Mark all read
+        </button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    @if (unread().length > 0) {
+      <div class="mb-6">
+        <h2 class="text-sm font-bold uppercase tracking-widest mb-3 opacity-50" style="color:var(--text)">Unread</h2>
+        <div class="space-y-2">
+          @for (n of unread(); track n.id) {
+            <div (click)="markRead(n)"
+              class="flex items-start gap-4 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md"
+              style="background-color:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--accent)">
+              <span class="text-xl shrink-0 mt-0.5">{{ typeIcon(n.type) }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <p class="text-sm font-bold" style="color:var(--text)">{{ n.title }}</p>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium" [class]="typeClass(n.type)">
+                    {{ n.type }}
+                  </span>
+                </div>
+                <p class="text-sm leading-relaxed mb-1" style="color:var(--text-muted)">{{ n.message }}</p>
+                <div class="flex items-center gap-3">
+                  <p class="text-xs" style="color:var(--text-muted)">{{ formatDate(n.created) }}</p>
+                  <a [routerLink]="n.link" class="text-xs font-semibold" style="color:var(--accent)">View →</a>
+                </div>
+              </div>
+              <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0 mt-1.5"></div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (read().length > 0) {
+      <div>
+        <h2 class="text-sm font-bold uppercase tracking-widest mb-3 opacity-50" style="color:var(--text)">Earlier</h2>
+        <div class="space-y-2">
+          @for (n of read(); track n.id) {
+            <div class="flex items-start gap-4 p-4 rounded-2xl transition-all"
+              style="background-color:var(--card-bg);border:1px solid var(--border);opacity:0.7">
+              <span class="text-xl shrink-0 mt-0.5 grayscale">{{ typeIcon(n.type) }}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold mb-0.5" style="color:var(--text)">{{ n.title }}</p>
+                <p class="text-sm leading-relaxed mb-1" style="color:var(--text-muted)">{{ n.message }}</p>
+                <p class="text-xs" style="color:var(--text-muted)">{{ formatDate(n.created) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (sorted().length === 0) {
+      <div class="text-center py-16">
+        <div class="text-5xl mb-4">🔕</div>
+        <p class="text-lg font-semibold mb-2" style="color:var(--text)">All caught up!</p>
+        <p style="color:var(--text-muted)">No notifications to show</p>
+      </div>
+    }
+
+    } <!-- end !loading -->
+  </main>
+</div>

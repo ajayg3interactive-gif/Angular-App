@@ -1,0 +1,184 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color:var(--text)">Projects</h1>
+        <p class="text-sm mt-0.5" style="color:var(--text-muted)">{{ filtered().length }} projects found</p>
+      </div>
+      @if (rbac.isAdmin()) {
+        <button (click)="openCreate()"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-80 flex items-center gap-2"
+          style="background-color:var(--accent)">
+          <span>+</span> New Project
+        </button>
+      }
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <input [(ngModel)]="searchQuery" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        placeholder="Search projects..."
+        class="flex-1 min-w-48 px-4 py-2 rounded-xl text-sm border outline-none focus:ring-2"
+        style="background-color:var(--card-bg);color:var(--text);border-color:var(--border);--tw-ring-color:var(--accent)"/>
+      <select (change)="filterStatus.set($any($event.target).value)"
+        class="px-4 py-2 rounded-xl text-sm border outline-none"
+        style="background-color:var(--card-bg);color:var(--text);border-color:var(--border)">
+        <option value="">All statuses</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+      </select>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    <!-- Projects Grid -->
+    <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      @for (p of filtered(); track p.id) {
+        <div class="rounded-2xl p-5 shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow"
+             style="background-color:var(--card-bg);border:1px solid var(--border)">
+
+          <!-- Top -->
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-2 h-2 rounded-full shrink-0" [class]="priorityDot(p.priority)"></span>
+                <p class="text-sm font-bold truncate" style="color:var(--text)">{{ p.title }}</p>
+              </div>
+              <p class="text-xs line-clamp-2 leading-relaxed" style="color:var(--text-muted)">{{ p.description }}</p>
+            </div>
+            <span class="ml-2 text-xs px-2.5 py-1 rounded-full font-medium shrink-0" [class]="statusColor(p.status)">
+              {{ statusLabel(p.status) }}
+            </span>
+          </div>
+
+          <!-- Progress -->
+          <div>
+            <div class="flex justify-between text-xs mb-1.5" style="color:var(--text-muted)">
+              <span>Progress</span><span class="font-bold" style="color:var(--text)">{{ p.completion }}%</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-700">
+              <div class="h-2 rounded-full transition-all"
+                [style.width.%]="p.completion"
+                [style.background-color]="p.completion >= 100 ? '#10b981' : p.completion >= 50 ? '#6366f1' : '#f59e0b'"></div>
+            </div>
+          </div>
+
+          <!-- Budget -->
+          <div>
+            <div class="flex justify-between text-xs mb-1.5" style="color:var(--text-muted)">
+              <span>Budget used</span><span class="font-bold" style="color:var(--text)">{{ budgetPct(p) }}%</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+              <div class="h-1.5 rounded-full transition-all"
+                [style.width.%]="budgetPct(p)"
+                [class]="budgetPct(p) > 90 ? 'bg-red-500' : budgetPct(p) > 70 ? 'bg-amber-500' : 'bg-emerald-500'"></div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="flex flex-wrap gap-1.5">
+            @for (tag of p.tags; track tag) {
+              <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-indigo-50 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-300">
+                {{ tag }}
+              </span>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="flex items-center justify-between pt-2 border-t" style="border-color:var(--border)">
+            <span class="text-xs" style="color:var(--text-muted)">{{ p.startDate }} → {{ p.endDate }}</span>
+            @if (rbac.isAdmin()) {
+              <div class="flex gap-1">
+                <button (click)="openEdit(p)"
+                  class="p-1.5 rounded-lg transition-colors hover:bg-indigo-100 text-indigo-600">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                  </svg>
+                </button>
+                <button (click)="delete(p)"
+                  class="p-1.5 rounded-lg transition-colors hover:bg-red-100 text-red-600">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="col-span-3 text-center py-16">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-30" style="color:var(--text)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586l5.414 5.414V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p style="color:var(--text-muted)">No projects found</p>
+        </div>
+      }
+    </div>
+    } <!-- end !loading -->
+  </main>
+</div>
+
+<!-- Modal -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-2xl shadow-2xl p-6" style="background-color:var(--card-bg)">
+      <h2 class="text-lg font-bold mb-5" style="color:var(--text)">
+        {{ editTarget() ? 'Edit Project' : 'New Project' }}
+      </h2>
+      <div class="space-y-4">
+        <input [(ngModel)]="form().title" placeholder="Project title *"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none"
+          style="background-color:var(--bg);color:var(--text);border-color:var(--border)"/>
+        <textarea [(ngModel)]="form().description" placeholder="Description" rows="2"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none resize-none"
+          style="background-color:var(--bg);color:var(--text);border-color:var(--border)"></textarea>
+        <div class="grid grid-cols-2 gap-3">
+          <select [(ngModel)]="form().status"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color:var(--bg);color:var(--text);border-color:var(--border)">
+            @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+          </select>
+          <select [(ngModel)]="form().priority"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color:var(--bg);color:var(--text);border-color:var(--border)">
+            @for (p of priorities; track p) { <option [value]="p">{{ p | titlecase }}</option> }
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <input type="date" [(ngModel)]="form().startDate"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color:var(--bg);color:var(--text);border-color:var(--border)"/>
+          <input type="date" [(ngModel)]="form().endDate"
+            class="px-4 py-2.5 rounded-xl text-sm border outline-none"
+            style="background-color:var(--bg);color:var(--text);border-color:var(--border)"/>
+        </div>
+        <input type="number" [(ngModel)]="form().budget" placeholder="Budget (USD)"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none"
+          style="background-color:var(--bg);color:var(--text);border-color:var(--border)"/>
+        <input [(ngModel)]="form().tags" placeholder="Tags (comma separated)"
+          class="w-full px-4 py-2.5 rounded-xl text-sm border outline-none"
+          style="background-color:var(--bg);color:var(--text);border-color:var(--border)"/>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button (click)="showModal.set(false)"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/10"
+          style="border-color:var(--border);color:var(--text)">
+          Cancel
+        </button>
+        <button (click)="save()" [disabled]="saving()"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+          style="background-color:var(--accent)">
+          {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

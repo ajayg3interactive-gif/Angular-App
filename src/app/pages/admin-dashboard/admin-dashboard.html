@@ -1,0 +1,217 @@
+<div class="flex min-h-screen" style="background-color:var(--bg)">
+  <app-sidebar></app-sidebar>
+
+  <main class="flex-1 lg:ml-64 p-6 overflow-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold" style="color:var(--text)">Admin Dashboard</h1>
+        <p class="text-sm mt-0.5" style="color:var(--text-muted)">
+          Welcome back, <span class="font-semibold" style="color:var(--accent)">{{ auth.currentUser()?.name }}</span>
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <a routerLink="/projects"
+           class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-80"
+           style="background-color:var(--accent)">
+          + New Project
+        </a>
+        <a routerLink="/notifications" class="relative p-2.5 rounded-xl transition-colors hover:bg-white/10">
+          <svg class="w-5 h-5" style="color:var(--text)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          @if (notifSvc.unreadCount() > 0) {
+            <span class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+              {{ notifSvc.unreadCount() }}
+            </span>
+          }
+        </a>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+      <!-- Total Projects -->
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--text-muted)">Total Projects</p>
+        </div>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ projectSvc.totalProjects() }}</p>
+        <p class="text-xs mt-1 text-indigo-500 font-medium">{{ projectSvc.activeProjects() }} active</p>
+      </div>
+
+      <!-- Developers -->
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center">
+            <svg class="w-5 h-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--text-muted)">Developers</p>
+        </div>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ developerUsers().length }}</p>
+        <p class="text-xs mt-1 text-cyan-500 font-medium">{{ userSvc.activeUsers() }} total active</p>
+      </div>
+
+      <!-- Revenue -->
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--text-muted)">Revenue</p>
+        </div>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ formatCurrency(totalRevenue()) }}</p>
+        <p class="text-xs mt-1 text-emerald-500 font-medium">of {{ formatCurrency(totalBudget()) }} budget</p>
+      </div>
+
+      <!-- Pending Tasks -->
+      <div class="rounded-2xl p-5 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
+            <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--text-muted)">Pending Tasks</p>
+        </div>
+        <p class="text-3xl font-bold" style="color:var(--text)">{{ pendingCards() }}</p>
+        <p class="text-xs mt-1 text-red-500 font-medium">{{ overdueTasks() }} overdue</p>
+      </div>
+    </div>
+
+    <!-- Task Status Distribution -->
+    <div class="rounded-2xl p-6 mb-8 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+      <h2 class="text-base font-bold mb-5" style="color:var(--text)">Task Status Distribution</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        @for (col of statusStats(); track col.key) {
+          <div class="text-center">
+            <div class="relative w-14 h-14 mx-auto mb-2">
+              <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="2.5"
+                  class="text-slate-100 dark:text-slate-700"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" [style.stroke]="col.color" stroke-width="2.5"
+                  stroke-dasharray="100" [attr.stroke-dashoffset]="100 - col.pct"
+                  stroke-linecap="round"/>
+              </svg>
+              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold" [style.color]="col.color">
+                {{ col.count }}
+              </span>
+            </div>
+            <p class="text-xs font-medium" style="color:var(--text-muted)">{{ col.label }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+
+      <!-- Recent Projects -->
+      <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-bold" style="color:var(--text)">Recent Projects</h2>
+          <a routerLink="/projects" class="text-sm font-medium" style="color:var(--accent)">View all</a>
+        </div>
+        <div class="space-y-3">
+          @for (p of recentProjects(); track p.id) {
+            <div class="flex items-center gap-3 p-3 rounded-xl" style="background-color:var(--bg)">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate" style="color:var(--text)">{{ p.title }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium" [class]="statusColor(p.status)">
+                    {{ statusLabel(p.status) }}
+                  </span>
+                  <span class="text-xs" style="color:var(--text-muted)">{{ p.completion }}%</span>
+                </div>
+              </div>
+              <div class="w-16">
+                <div class="h-1.5 rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div class="h-1.5 rounded-full bg-indigo-500 transition-all" [style.width.%]="p.completion"></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Active Work Cards -->
+      <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-bold" style="color:var(--text)">Active Work Items</h2>
+          <a routerLink="/kanban" class="text-sm font-medium" style="color:var(--accent)">Kanban</a>
+        </div>
+        <div class="space-y-3">
+          @for (c of recentCards(); track c.id) {
+            <div class="flex items-center gap-3 p-3 rounded-xl" style="background-color:var(--bg)">
+              <div class="w-2 h-2 rounded-full shrink-0"
+                [style.background-color]="priorityConfig[c.priority].color"></div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate" style="color:var(--text)">{{ c.title }}</p>
+                <p class="text-xs" style="color:var(--text-muted)">Due {{ c.dueDate }}</p>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
+                [style.background-color]="priorityConfig[c.priority].bg"
+                [style.color]="priorityConfig[c.priority].color">
+                {{ c.priority }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Overview -->
+    <div class="rounded-2xl p-6 shadow-sm" style="background-color:var(--card-bg);border:1px solid var(--border)">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-base font-bold" style="color:var(--text)">Team Overview</h2>
+        <a routerLink="/teams" class="text-sm font-medium" style="color:var(--accent)">Manage teams</a>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        @for (u of developerUsers(); track u.id) {
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background-color:var(--bg)">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                 style="background-color:var(--accent)">
+              {{ u.name.charAt(0) }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold truncate" style="color:var(--text)">{{ u.name }}</p>
+              <p class="text-xs" style="color:var(--text-muted)">{{ u.department }}</p>
+            </div>
+            <span class="ml-auto w-2 h-2 rounded-full shrink-0"
+              [class]="u.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+          </div>
+        }
+        @for (u of clientUsers(); track u.id) {
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background-color:var(--bg)">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 bg-emerald-600">
+              {{ u.name.charAt(0) }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold truncate" style="color:var(--text)">{{ u.name }}</p>
+              <p class="text-xs text-emerald-600">Client</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    } <!-- end !loading -->
+  </main>
+</div>
