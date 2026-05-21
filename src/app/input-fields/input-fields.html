@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-10 justify-center items-center mt-30">
+  <input
+    type="text"
+    placeholder="Enter name"
+    class="border"
+    (input)="getUserName($event)"
+    #userNameField
+    class="p-2 border rounded-xl"
+  />
+  <button
+    (click)="getUserNameWithTemplate(userNameField.value)"
+    class="cursor-pointer border p-2 px-9 rounded-sm bg-blue-700 text-white font-bold"
+  >
+    get
+  </button>
+
+  <input
+    type="text"
+    placeholder="Enter name with ngModel"
+    [(ngModel)]="userName"
+    class="p-2 border rounded-xl"
+  />
+
+  <button
+    (click)="showNgModelValue()"
+    class="cursor-pointer border p-2 px-9 rounded-sm bg-green-700 text-white font-bold"
+  >
+    Get ngModel Value
+  </button>
+  <p class="text-xl font-bold">Live Value: {{ userName }}</p>
+</div>

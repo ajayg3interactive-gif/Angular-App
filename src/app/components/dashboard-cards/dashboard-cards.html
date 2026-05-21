@@ -1,0 +1,77 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+  <!-- Total Users -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <span class="text-xs font-semibold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">All Time</span>
+    </div>
+    <div class="text-3xl font-bold text-gray-800 mb-1">{{ userService.totalUsers() }}</div>
+    <p class="text-sm text-gray-500 font-medium">Total Users</p>
+    <div class="mt-4 flex items-center gap-1.5 text-xs text-blue-600 font-medium">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+      </svg>
+      <span>Total registered users</span>
+    </div>
+  </div>
+
+  <!-- Active Users -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <span class="text-xs font-semibold bg-green-50 text-green-600 px-2.5 py-1 rounded-full">Active</span>
+    </div>
+    <div class="text-3xl font-bold text-gray-800 mb-1">{{ userService.activeUsers() }}</div>
+    <p class="text-sm text-gray-500 font-medium">Active Users</p>
+    <div class="mt-4">
+      <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+        <span>Active rate</span>
+        <span class="font-semibold text-green-600">{{ activePercent() }}%</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-1.5">
+        <div
+          class="bg-green-500 h-1.5 rounded-full transition-all duration-700"
+          [style.width.%]="activePercent()"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inactive Users -->
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default group">
+    <div class="flex items-center justify-between mb-4">
+      <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+        </svg>
+      </div>
+      <span class="text-xs font-semibold bg-red-50 text-red-500 px-2.5 py-1 rounded-full">Inactive</span>
+    </div>
+    <div class="text-3xl font-bold text-gray-800 mb-1">{{ userService.inactiveUsers() }}</div>
+    <p class="text-sm text-gray-500 font-medium">Inactive Users</p>
+    <div class="mt-4">
+      <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+        <span>Inactive rate</span>
+        <span class="font-semibold text-red-500">{{ inactivePercent() }}%</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-1.5">
+        <div
+          class="bg-red-400 h-1.5 rounded-full transition-all duration-700"
+          [style.width.%]="inactivePercent()"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+</div>
