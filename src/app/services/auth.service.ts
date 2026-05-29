@@ -13,16 +13,20 @@ export class AuthService {
 
   private readonly STORAGE_KEY = 'auth_user';
 
-  private _currentUser = signal<AuthUser | null>(null);
+  private _currentUser  = signal<AuthUser | null>(null);
+  private _initialized  = signal(false);
 
-  readonly currentUser = this._currentUser.asReadonly();
-  readonly isLoggedIn  = computed(() => this._currentUser() !== null);
+  readonly currentUser  = this._currentUser.asReadonly();
+  readonly isLoggedIn   = computed(() => this._currentUser() !== null);
+  readonly initialized  = this._initialized.asReadonly();
 
   /** Called by APP_INITIALIZER — runs before any route guard executes. */
-  init(): void {
+  init(): Promise<void> {
     if (this.isBrowser) {
       this.restoreSession();
     }
+    this._initialized.set(true);
+    return Promise.resolve();
   }
 
   /** Persist authenticated user to localStorage and update signal. */

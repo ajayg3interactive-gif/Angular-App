@@ -11,7 +11,7 @@ import { ThemeService } from './services/theme.service';
   imports: [RouterOutlet, Spinner, ToastComponent],
   template: `
     <router-outlet></router-outlet>
-    <app-spinner></app-spinner>
+    <!-- <app-spinner></app-spinner> -->
     <app-toast></app-toast>
   `,
 })

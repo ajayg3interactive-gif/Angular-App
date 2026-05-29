@@ -15,10 +15,10 @@ import { PRIORITY_CONFIG, CARD_COLUMNS } from '../../interfaces/project';
   templateUrl: './admin-dashboard.html',
 })
 export class AdminDashboard implements OnInit {
-  auth        = inject(AuthService);
-  projectSvc  = inject(ProjectService);
-  userSvc     = inject(UserService);
-  notifSvc    = inject(NotificationService);
+  auth = inject(AuthService);
+  projectSvc = inject(ProjectService);
+  userSvc = inject(UserService);
+  notifSvc = inject(NotificationService);
 
   loading = signal(true);
 
@@ -73,7 +73,10 @@ export class AdminDashboard implements OnInit {
   priorityConfig = PRIORITY_CONFIG;
 
   ngOnInit(): void {
-    this.projectSvc.loadAll().subscribe(() => this.loading.set(false));
+    this.projectSvc.loadAll().subscribe({
+      next: () => this.loading.set(false),
+      error: () => this.loading.set(false),
+    })
     this.userSvc.loadAll().subscribe();
     const uid = this.auth.currentUser()?.id;
     if (uid) this.notifSvc.loadForUser(uid).subscribe();

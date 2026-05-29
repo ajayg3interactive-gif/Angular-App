@@ -13,8 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideClientHydration(withEventReplay()),
-    provideAppInitializer(() => {
-      inject(AuthService).init();
-    }),
+    provideAppInitializer(() => inject(AuthService).init()),
   ],
 };
